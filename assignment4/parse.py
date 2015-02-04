@@ -1,5 +1,6 @@
 import csv
 import sys
+import matplotlib.pyplot as plt
 
 def readCSV(filename):
     '''Reads the CSV file `filename` and returns a list
@@ -38,14 +39,16 @@ def zip_code_barchart():
 	for j in range(len(permits)):
 		current=permits[j]
 		for i in range(28,len(current),7):
-			if current[i]=="":
+			cut=current[i]
+			if cut=="":
 				continue
-			if current[i] in zip_dict:
-				zip_dict[current[i]] += 1
+			if cut[0:5] in zip_dict:
+				zip_dict[cut[0:5]]+= 1
 			else:
-				zip_dict[current[i]] = 1
-	print(zip_dict)
-
+				zip_dict[cut[0:5]] = 1
+	plt.bar(range(len(zip_dict)), zip_dict.values(), align='center')
+	plt.xticks(range(len(zip_dict)), zip_dict.keys())
+	plt.savefig('BarChart.jpg')
 # zip_code_barchart()
 
 
