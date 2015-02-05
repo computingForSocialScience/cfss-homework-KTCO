@@ -13,7 +13,6 @@ def readCSV(filename):
         lines = list(rdr)
     return(lines)
 
-
 ### enter your code below
 
 def get_avg_latlng():
@@ -31,8 +30,6 @@ def get_avg_latlng():
 	lon_avg = lon/len(permit_list)
 	print "Avg latitude:",lat_avg,"Avg longitude:",lon_avg
 
-# get_avg_latlng()
-
 def zip_code_barchart():
 	zip_dict={}
 	permits = readCSV("permits_hydepark.csv")
@@ -48,7 +45,12 @@ def zip_code_barchart():
 				zip_dict[cut[0:5]] = 1
 	plt.bar(range(len(zip_dict)), zip_dict.values(), align='center')
 	plt.xticks(range(len(zip_dict)), zip_dict.keys())
+	plt.xticks(rotation=90)
 	plt.savefig('BarChart.jpg')
-# zip_code_barchart()
-
-
+if len(sys.argv)==1 or len(sys.argv)>2:
+	sys.exit()
+else:
+	if sys.argv[1]=="latlong":
+		get_avg_latlng()
+	elif sys.argv[1]=="hist":
+		zip_code_barchart()
