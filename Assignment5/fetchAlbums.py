@@ -15,8 +15,6 @@ def fetchAlbumIds(artist_id):
 
     return albums
 
-#fetchAlbumIds(fetchArtistId("Regina Spektor"))
-
 def fetchAlbumInfo(album_id):
     """Using the Spotify API, take an album ID 
     and return a dictionary with keys 'artist_id', 'album_id' 'name', 'year', popularity'

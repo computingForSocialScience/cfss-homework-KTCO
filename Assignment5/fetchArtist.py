@@ -15,14 +15,13 @@ def fetchArtistId(name):
     return ID
 
 
-
 def fetchArtistInfo(artist_id):
     """Using the Spotify API, takes a string representing the id and
 `   returns a dictionary including the keys 'followers', 'genres', 
     'id', 'name', and 'popularity'.
     """
     artists_dict = {}
-    
+
     url = "https://api.spotify.com/v1/artists/"+artist_id
 
     src = requests.get(url)
@@ -36,4 +35,5 @@ def fetchArtistInfo(artist_id):
 
     return artists_dict
 
-#fetchArtistInfo(fetchArtistId("Patti Smith"))
+# Tests
+# fetchArtistInfo(fetchArtistId("Patti Smith"))
