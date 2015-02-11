@@ -10,7 +10,7 @@ def writeArtistsTable(artist_info_list):
     The csv file should have a header line that looks like this:
     ARTIST_ID,ARTIST_NAME,ARTIST_FOLLOWERS,ARTIST_POPULARITY
     """
-    outFile = open('artists.csv','w') 
+    outFile = open('artists.csv','w',encoding='utf-8') 
     output = []
 
     outFile.write(u'ARTIST_ID,ARTIST_NAME,ARTIST_FOLLOWERS,ARTIST_POPULARITY\n')
@@ -33,7 +33,7 @@ def writeAlbumsTable(album_info_list):
     The csv file should have a header line that looks like this:
     ARTIST_ID,ALBUM_ID,ALBUM_NAME,ALBUM_YEAR,ALBUM_POPULARITY
     """
-    outFile = open('albums.csv','w')
+    outFile = open('albums.csv','w',encoding='utf-8')
     output = []
     outFile.write(u'ARTIST_ID,ALBUM_ID,ALBUM_NAME,ALBUM_YEAR,ALBUM_POPULARITY')
     

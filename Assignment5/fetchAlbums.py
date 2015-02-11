@@ -33,9 +33,3 @@ def fetchAlbumInfo(album_id):
     album_dict['popularity'] = album_data['popularity']
 
     return album_dict
-
-
-
-# tests
-# print(fetchAlbumInfo(fetchAlbumIds(fetchArtistId("Regina Spektor"))[0]))
-# print(fetchAlbumInfo(fetchAlbumIds(fetchArtistId("Patti Smith"))[0]))

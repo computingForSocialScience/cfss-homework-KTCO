@@ -35,5 +35,3 @@ def fetchArtistInfo(artist_id):
 
     return artists_dict
 
-# Tests
-# fetchArtistInfo(fetchArtistId("Patti Smith"))
