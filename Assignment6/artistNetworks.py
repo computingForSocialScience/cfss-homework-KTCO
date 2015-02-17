@@ -1,6 +1,6 @@
 import requests
 import pandas as pd
-import matplotlib.pyplot as plt
+
 
 def getRelatedArtists(artistID):
 	# Takes an artist ID and returns a list of related artists IDs
@@ -21,9 +21,8 @@ def getRelatedArtists(artistID):
 def getDepthEdges(artistID, depth):
 	# Takes an artist ID and the depth of the search and returns
 	# a list of tuples of related artists
-
-	artist_pairs = []
 	
+	artist_pairs = []
 	for i in range(depth):
 		artists = getRelatedArtists(artistID)
 		for artist in artists:
@@ -31,18 +30,17 @@ def getDepthEdges(artistID, depth):
 			if (depth-1)==0:
 				pass
 			else:
-				artist_pairs.append(getDepthEdges(artist,(depth-1)))
-
+				artist_pairs=artist_pairs+(getDepthEdges(artist,(depth-1)))
 	return artist_pairs
 
 def getEdgeList(artistID,depth):
 	# Takes an artist ID, depth of search and returns an a Pandas DataFrame
 
 	artist_depth_list=getDepthEdges(artistID,depth)
-	artist_df = pd.DataFrame(artist_depth_list,\
+	artist_df = pd.DataFrame.from_records(artist_depth_list,
 		columns=['Artist IDs','Related Artists IDs'])
-
-	return artist_df
+	rm_duplicates = artist_df.drop_duplicates()
+	return rm_duplicates
 
 def writeEdgeList(artistID,depth,filename):
 	# Takes artist ID, depth, and filename and returns a csv file with 
@@ -52,7 +50,9 @@ def writeEdgeList(artistID,depth,filename):
 	return pd.DataFrame.to_csv(df,filename+".csv",index=False)
 
 
-# writeEdgeList("2mAFHYBasVVtMekMUkRO9g",1,"Edge_Test")
-# print(getEdgeList("2mAFHYBasVVtMekMUkRO9g",1))
-# print(getDepthEdges("2mAFHYBasVVtMekMUkRO9g",1))
+writeEdgeList("2PtMZoO4GEp2JEN3pxbTmO",1,"Edge_Test2")
+writeEdgeList("2mAFHYBasVVtMekMUkRO9g",1,"Edge_Test")
+# writeEdgeList("2mAFHYBasVVtMekMUkRO9g",2,"Edge_Test")
+# print(getEdgeList("2mAFHYBasVVtMekMUkRO9g",2))
+# print(getDepthEdges("2mAFHYBasVVtMekMUkRO9g",2))
 # print(getRelatedArtists("2mAFHYBasVVtMekMUkRO9g"))
