@@ -33,11 +33,11 @@ def degree(edgeList, in_or_out):
 def combineEdgelists(edgeList1, edgeList2):
 	# Takes two data frames and returns a combined dataframe
 
-	Master_list = edgeList1.append(edgeList2, ignore_index=True)
+	Master_list = edgeList1.append(edgeList2,ignore_index=True)
 	return Master_list.drop_duplicates()
 
 # print(readEdgeList("Edge_Test.csv"))
 # print degree(readEdgeList("Edge_Test.csv"),"in")
 # print degree(readEdgeList("Edge_Test.csv"),"out")
-print combineEdgelists(readEdgeList("Edge_Test.csv"),\
-	readEdgeList("Edge_Test2.csv"))
+# print combineEdgelists(readEdgeList("Edge_Test.csv"),\
+# 	readEdgeList("Edge_Test2.csv"))

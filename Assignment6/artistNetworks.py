@@ -50,8 +50,8 @@ def writeEdgeList(artistID,depth,filename):
 	return pd.DataFrame.to_csv(df,filename+".csv",index=False)
 
 
-writeEdgeList("2PtMZoO4GEp2JEN3pxbTmO",1,"Edge_Test2")
-writeEdgeList("2mAFHYBasVVtMekMUkRO9g",1,"Edge_Test")
+# writeEdgeList("2PtMZoO4GEp2JEN3pxbTmO",1,"Edge_Test2")
+# writeEdgeList("2mAFHYBasVVtMekMUkRO9g",1,"Edge_Test")
 # writeEdgeList("2mAFHYBasVVtMekMUkRO9g",2,"Edge_Test")
 # print(getEdgeList("2mAFHYBasVVtMekMUkRO9g",2))
 # print(getDepthEdges("2mAFHYBasVVtMekMUkRO9g",2))
