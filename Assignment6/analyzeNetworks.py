@@ -32,7 +32,7 @@ def degree(edgeList, in_or_out):
 	if in_or_out == "in":
 		return df['Related Artists IDs'].value_counts()
 
-def combineEdgelists(edgeList1, edgeList2):
+def combineEdgeLists(edgeList1, edgeList2):
 	# Takes two data frames and returns a combined dataframe
 
 	Master_list = edgeList1.append(edgeList2,ignore_index=True)
@@ -70,7 +70,7 @@ def randomCentralNode(inputDiGraph):
 # print(readEdgeList("Edge_Test.csv"))
 # print degree(readEdgeList("Edge_Test.csv"),"in")
 # print degree(readEdgeList("Edge_Test.csv"),"out")
-# print combineEdgelists(readEdgeList("Edge_Test.csv"),\
+# print combineEdgeLists(readEdgeList("Edge_Test.csv"),\
 # readEdgeList("Edge_Test2.csv"))
 # pandasToNetworkX(readEdgeList("Edge_Test.csv"))
-print randomCentralNode(pandasToNetworkX((readEdgeList("Edge_Test.csv"))))
+# print randomCentralNode(pandasToNetworkX((readEdgeList("Edge_Test.csv"))))

@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
-
+import numpy as np
+import csv
 
 def getRelatedArtists(artistID):
 	# Takes an artist ID and returns a list of related artists IDs
@@ -43,11 +44,11 @@ def getEdgeList(artistID,depth):
 	return rm_duplicates
 
 def writeEdgeList(artistID,depth,filename):
-	# Takes artist ID, depth, and filename and returns a csv file with 
+	# Takes artist ID, depth, and filename.csv and returns a csv file with 
 	# pandas data frame written in it
 
 	df=getEdgeList(artistID,depth)
-	return pd.DataFrame.to_csv(df,filename+".csv",index=False)
+	return pd.DataFrame.to_csv(df,filename,index=False)
 
 
 # writeEdgeList("2PtMZoO4GEp2JEN3pxbTmO",1,"Edge_Test2")
