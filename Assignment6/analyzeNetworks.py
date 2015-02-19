@@ -1,5 +1,7 @@
 import requests
 import pandas as pd
+import networkx as nx
+import numpy as np
 
 def readEdgeList(filename):
 	# Takes a file name and reads the file and returns a data from of the file
@@ -36,8 +38,39 @@ def combineEdgelists(edgeList1, edgeList2):
 	Master_list = edgeList1.append(edgeList2,ignore_index=True)
 	return Master_list.drop_duplicates()
 
+def pandasToNetworkX(edgeList):
+	# Takes an edge list and returns a directed graph
+
+	g = nx.DiGraph()
+	for Artist, Related_Artist in edgeList.to_records(index=False):
+		g.add_edge(Artist,Related_Artist)
+
+
+	return g
+
+def randomCentralNode(inputDiGraph):
+
+	node_dict = nx.eigenvector_centrality(inputDiGraph)
+	norm_denominator = 0
+
+	# Find sum of all values for denominator to normalize
+	for node in node_dict:
+		norm_denominator = norm_denominator + node_dict[node]
+
+	# Normalize
+	for node in node_dict:
+		node_dict[node] = node_dict[node]/norm_denominator
+
+	# Gets random node
+	rndm_node = np.random.choice(node_dict.keys(),\
+	p=node_dict.values())
+
+	return rndm_node
+
 # print(readEdgeList("Edge_Test.csv"))
 # print degree(readEdgeList("Edge_Test.csv"),"in")
 # print degree(readEdgeList("Edge_Test.csv"),"out")
 # print combineEdgelists(readEdgeList("Edge_Test.csv"),\
-# 	readEdgeList("Edge_Test2.csv"))
+# readEdgeList("Edge_Test2.csv"))
+# pandasToNetworkX(readEdgeList("Edge_Test.csv"))
+print randomCentralNode(pandasToNetworkX((readEdgeList("Edge_Test.csv"))))
