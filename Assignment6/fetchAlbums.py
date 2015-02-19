@@ -49,6 +49,3 @@ def fetchRndmSong(album_id):
     track_name = np.random.choice(track_names)
 
     return track_name
-
-# fetchRndmSong("1jWKVgnHX8nwR551hQNx5K")
-# print(fetchAlbumInfo("7Hu7w1BHu11Uoqq6Q4LneM"))
