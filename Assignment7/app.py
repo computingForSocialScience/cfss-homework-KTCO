@@ -44,8 +44,13 @@ def add_playlist():
         # this code executes when someone fills out the form
         artistName = request.form['artistName']
         # YOUR CODE HERE
-        return(redirect("/playlists/"))
+        try:
+            createNewPlaylist(artistName)
+            return(redirect("/playlists/"))
+        except LookupError:
+            return(redirect("/addPlaylist/"))
 
+#Creates the tables for both playlists and songs in the sql database
 sql_playlists = '''CREATE TABLE IF NOT EXISTS 
 playlists(id varchar (128), rootArtist nvarchar (128));'''
 
@@ -56,44 +61,64 @@ sql_songs = '''CREATE TABLE IF NOT EXISTS songs
 c.execute(sql_playlists)
 c.execute(sql_songs)
 
-playlist_id = 0
-
 def createNewPlaylist(artist):
-    global playlist_id 
-    playlist_id = playlist_id + 1
+    # finds the max id in playlists and makes the next artist an
+    # one more than that or makes the id 1 if there are no artists
+    c.execute('''SELECT MAX(id) FROM playlists''')
+    max_id_list = c.fetchall()
+    if max_id_list[0][0] == None:
+        playlist_id = 1
+    else:
+        max_id = int(max_id_list[0][0])
+        playlist_id = max_id+1
 
+    # fetches the artist id using the name given. If the name returns
+    # nothing then the definition ends else it continues
     artist_id = fetchArtistId(artist)
-    fill_table = "INSERT INTO playlists (id, rootArtist) VALUES ('%s','%s');"\
-    % (playlist_id, artist)
-    c.execute(fill_table)
+    if artist_id == None:
+        return
+    else:
+        # Creates a new sql table using the successfully fetched artist
+        fill_table = "INSERT INTO playlists (id, rootArtist) VALUES ('%s','%s');"\
+        % (playlist_id, artist)
+        c.execute(fill_table)
 
-    df = getDepthEdges(artist_id,2)
-    song_list = []
+        # gets a list of related artists 2 deep
+        df = getDepthEdges(artist_id,2)
+        song_list = []
 
-    for a in range(30):
-        artist = random.choice(df)
-        info = fetchArtistInfo(artist[1])
+        #finds 30 random artists from the list and gets information
+        for a in range(30):
 
-        artistName = info['name'].replace("'","''")
-        songOrder = a+1
-        related_artist = artist[1]
-        album_list = fetchAlbumIds(artist[1])
-        try:
-            album_id = random.choice(album_list)
-            album_name = fetchAlbumInfo(album_id)['album_name'].replace("'","''")
-            song = fetchRndmSong(album_id).replace("'","''")
-        except IndexError:
-            album_name = "No Albums"
-            song = "No Albums"
-        temp = (playlist_id, songOrder, artistName, album_name, song)
-        
-        song_list.append(temp)
+            # chooses a random artist and fetches info
+            artist = random.choice(df)
+            info = fetchArtistInfo(artist[1])
 
-    insertQuery = '''INSERT INTO songs (playlistId, songOrder, artistName, 
-        albumName, trackName) VALUES (%s, %s, %s, %s, %s);'''
-    c.executemany(insertQuery,song_list)
+            # puts info into variables to be put into a list
+            artistName = info['name'].replace("'","''")
+            songOrder = a+1
+            related_artist = artist[1]
+            album_list = fetchAlbumIds(artist[1])
+            # I encountered some artists without albums so this is
+            # here so it doesn't break
+            try:
+                album_id = random.choice(album_list)
+                album_name = fetchAlbumInfo(album_id)['album_name'].replace("'","''")
+                song = fetchRndmSong(album_id).replace("'","''")
+            except IndexError:
+                album_name = "No Albums"
+                song = "No Albums"
 
-    db.commit()
+            # Creates a tuple and appends it to the list of songs and info
+            temp = (playlist_id, songOrder, artistName, album_name, song)
+            song_list.append(temp)
+
+        # inserts information into the sql database
+        insertQuery = '''INSERT INTO songs (playlistId, songOrder, artistName, 
+            albumName, trackName) VALUES (%s, %s, %s, %s, %s);'''
+        c.executemany(insertQuery,song_list)
+
+        db.commit()
 
 if __name__ == '__main__':
     app.debug=True
@@ -101,5 +126,5 @@ if __name__ == '__main__':
 
 
 '''Tests'''
-# createNewPlaylist("Patti Smith")
-# createNewPlaylist("Red Hot Chili Peppers")
+#createNewPlaylist("Patti Smith")
+#createNewPlaylist("Red Hot Chili Peppers")
