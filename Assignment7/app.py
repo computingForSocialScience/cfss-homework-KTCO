@@ -29,6 +29,9 @@ def make_playlists_resp():
 
 @app.route('/playlist/<playlistId>')
 def make_playlist_resp(playlistId):
+    c.execute('''SELECT * FROM songs
+                WHERE playlistId=%s;''',playlistId)
+    songs = c.fetchall()
     return render_template('playlist.html',songs=songs)
 
 
@@ -77,10 +80,11 @@ def createNewPlaylist(artist):
         album_list = fetchAlbumIds(artist[1])
         try:
             album_id = random.choice(album_list)
+            album_name = fetchAlbumInfo(album_id)['album_name'].replace("'","''")
+            song = fetchRndmSong(album_id).replace("'","''")
         except IndexError:
-            album_id = None
-        album_name = fetchAlbumInfo(album_id)['album_name'].replace("'","''")
-        song = fetchRndmSong(album_id).replace("'","''")
+            album_name = "No Albums"
+            song = "No Albums"
         temp = (playlist_id, songOrder, artistName, album_name, song)
         
         song_list.append(temp)
