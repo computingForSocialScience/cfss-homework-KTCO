@@ -1,0 +1,64 @@
+<html>
+<head><title>Facebook Friends</title></head>
+<body>
+	<h1>Profile</h1>
+	<table border="3" style="width: 100%;">
+		{% for uid, name, sex, affiliations, birthday, hometown_location, current_location, relationship_status, significant_other_id, political, religion, locale, profile_url, pic in friend_info %}
+
+		<tr><img src={{pic}} alt="prof pic"></tr>
+        <tr>
+        	<td>Name</td>
+        	<td>{{name}}</td>
+        </tr>
+        <tr>
+        	<td>User Id</td>
+        	<td>{{uid}}</td>
+        </tr>
+        <tr>
+        	<td>Sex</td>
+        	<td>{{sex}}</td>
+        </tr>
+        <tr>
+        	<td>Affiliations</td>
+        	<td>{{affiliations}}</td>
+        </tr>
+        <tr>
+        	<td>Birthday</td>
+        	<td>{{birthday}}</td>
+        </tr>
+        <tr>
+        	<td>Hometown</td>
+        	<td>{{hometown_location}}</td>
+        </tr>
+        <tr>
+        	<td>Current Location</td>
+        	<td>{{current_location}}</td>
+        </tr>
+        <tr>
+        	<td>Relationship Status</td>
+        	<td>{{relationship_status}}</td>
+        </tr>
+        <tr>
+        	<td>Significant Other Id</td>
+        	<td>{{significant_other_id}}</td>
+        </tr>
+        <tr>
+        	<td>Political View</td>
+        	<td>{{political}}</td>
+        </tr>
+        <tr>
+        	<td>Religion</td>
+        	<td>{{religion}}</td>
+        </tr>
+        <tr>
+        	<td>Locale</td>
+        	<td>{{locale}}</td>
+        </tr>
+        <tr>
+        	<td>Profile URL</td>
+        	<td>{{profile_url}}</td>
+        </tr>
+		{% endfor %}
+	</table>
+</body>
+</html>

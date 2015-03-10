@@ -1,0 +1,13 @@
+<html>
+<head><title>Facebook Friends</title></head>
+<body>
+	<h1>Friends</h1>
+	<table border="3" style="width: 18%;">
+		{% for uid, name in friend_info %}  
+        <tr>
+        	<td><a href="/profile/{{uid}}/">{{name}}</a></td>
+        </tr>
+		{% endfor %}
+	</table>
+</body>
+</html>
