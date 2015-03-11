@@ -2,7 +2,10 @@
 from flask import Flask, render_template, request, redirect, url_for
 from io import open
 import pymysql
+import pandas as pd
+import networkx as nx
 import json
+import matplotlib.pyplot as plt 
 import warnings
 
 dbname="facebook"
@@ -147,7 +150,23 @@ with warnings.catch_warnings():
 	except Warning:
 		pass
 
-# Flask Portion of the 
+# Undirected Graphs
+def create_undirected_graph(name):
+	edgeList = pd.read_json("friend_edges.json")
+	g = nx.Graph()
+
+	uid1 = edgeList.query('uid1==["%s"]'%name)
+	uid2 = edgeList.query('uid2==["%s"]'%name)
+	uid = pd.concat([uid1,uid2])
+
+	for uid1, uid2 in uid.to_records(index=False):
+		g.add_edge(uid1,uid2)
+
+	springLayout = nx.layout.spring_layout(g)
+	nx.draw(g,pos=circularLayout, with_labels="uid1")
+	plt.show()
+
+# Flask Portion
 @app.route('/')
 def make_index_resp():
 	c.execute('''SELECT uid, name FROM friend_info ORDER BY name;''')
@@ -156,13 +175,52 @@ def make_index_resp():
 
 @app.route('/profile/<uid>/')
 def make_profiles(uid):
-	c.execute('''SELECT * FROM friend_info 
-		WHERE uid=%s;''',uid)
+	c.execute('''SELECT name, sex, affiliations, birthday,
+	hometown_location, current_location, relationship_status, 
+	significant_other_id, political, religion, profile_url, pic 
+	FROM friend_info 
+	WHERE uid=%s;''',uid)
 	friend_info = c.fetchall()
-	return(render_template('profiles.html',friend_info=friend_info))
+
+	name = friend_info[0][0]
+	friend_list = []
+
+	c.execute('''SELECT * FROM friend_edges
+		WHERE uid1=%s;''',name)
+	friend_edge_uid1=c.fetchall()
+
+	for friend in friend_edge_uid1:
+		friend_list.append(friend[1])
+
+	c.execute('''SELECT * FROM friend_edges
+		WHERE uid2=%s;''',name)
+	friend_edge_uid2=c.fetchall()
+	
+	for friend in friend_edge_uid2:
+		friend_list.append(friend[0])
+
+	friend_list.sort()
+	friend_list.remove("Kevin On")
+	
+	uid = []
+	for friend in friend_list:
+		c.execute('''SELECT uid FROM friend_info WHERE name=%s;''',friend)
+		uid_info = c.fetchall()
+		if not uid_info:
+			continue
+		else:
+			uid.append(uid_info[0][0])
+	
+	uid_name = []
+	for i in range(len(uid)):
+		cat = (uid[i],friend_list[i])
+		uid_name.append(cat)
+
+	return(render_template('profiles.html',friend_info=friend_info,uid_name=uid_name))
 
 db.commit()
 
 if __name__ == '__main__':
     app.debug=True
     app.run()
+

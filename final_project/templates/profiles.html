@@ -1,18 +1,14 @@
 <html>
-<head><title>Facebook Friends</title></head>
+<head><title>Facebook Profile</title></head>
 <body>
 	<h1>Profile</h1>
 	<table border="3" style="width: 100%;">
-		{% for uid, name, sex, affiliations, birthday, hometown_location, current_location, relationship_status, significant_other_id, political, religion, locale, profile_url, pic in friend_info %}
+		{% for name, sex, affiliations, birthday, hometown_location, current_location, relationship_status, significant_other_id, political, religion, profile_url, pic in friend_info %}
 
 		<tr><img src={{pic}} alt="prof pic"></tr>
         <tr>
         	<td>Name</td>
         	<td>{{name}}</td>
-        </tr>
-        <tr>
-        	<td>User Id</td>
-        	<td>{{uid}}</td>
         </tr>
         <tr>
         	<td>Sex</td>
@@ -51,14 +47,16 @@
         	<td>{{religion}}</td>
         </tr>
         <tr>
-        	<td>Locale</td>
-        	<td>{{locale}}</td>
-        </tr>
-        <tr>
         	<td>Profile URL</td>
         	<td>{{profile_url}}</td>
         </tr>
 		{% endfor %}
 	</table>
+        <table border="4" style="width: 100%;">
+                <tr><td><b>Friends List</b></td></tr>
+                {% for uid,name in uid_name %}
+                <tr><td><a href="/profile/{{uid}}/">{{name}}</td></tr>
+                {% endfor %}
+        </table>
 </body>
 </html>
