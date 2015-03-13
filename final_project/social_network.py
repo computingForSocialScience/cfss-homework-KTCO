@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from io import open
+from create_tables import create_undirected_graph
 import pymysql
 import pandas as pd
 import networkx as nx
@@ -15,11 +16,11 @@ passwd="Harbinger17"
 db=pymysql.connect(db=dbname, host=host, user=user,passwd=passwd, charset='utf8')
 c = db.cursor()
 
-app = Flask(__name__)
-
 # Flask Portion
+
 UPLOAD_FOLDER = '/home/Kevin/cfss/cfss-homework-KTCO/final_project/uploads'
 ALLOWED_EXTENSIONS = set(['json'])
+app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
@@ -28,12 +29,15 @@ def allowed_file(filename):
 
 @app.route('/')
 def make_index_resp():
+	# creates a list of friends on the webpage
 	c.execute('''SELECT uid, name FROM friend_info ORDER BY name;''')
 	friend_info = c.fetchall()
 	return(render_template('index.html',friend_info=friend_info))
 
 @app.route('/profile/<uid>/')
+# takes an uid and finds information about them from the SQL server
 def make_profiles(uid):
+	# gets information about each person from SQL server
 	c.execute('''SELECT name, sex, affiliations, birthday,
 	hometown_location, current_location, relationship_status, 
 	significant_other_id, political, religion, profile_url, pic 
@@ -41,9 +45,11 @@ def make_profiles(uid):
 	WHERE uid=%s;''',uid)
 	friend_info = c.fetchall()
 
+	# finds the name of the person
 	name = friend_info[0][0]
 	name_list = []
-
+	# finds all of the names of friends from the server by looking in both
+	# uid1 and uid2 column
 	c.execute('''SELECT * FROM friend_edges
 		WHERE uid1=%s;''',name)
 	friend_edge_uid1=c.fetchall()
@@ -58,10 +64,13 @@ def make_profiles(uid):
 	for friend in friend_edge_uid2:
 		name_list.append(friend[0])
 
+	# sorts the names alphabetically
 	name_list.sort()
+	# my name does not have a uid associated with which throws some errors
 	name_list.remove("Kevin On")
 	
 	uid_list = []
+	# finds all uids associated with each name
 	for friend in name_list:
 		c.execute('''SELECT uid FROM friend_info WHERE name=%s;''',friend)
 		uid_info = c.fetchall()
@@ -70,31 +79,30 @@ def make_profiles(uid):
 		else:
 			uid_list.append(uid_info[0][0])
 	
+	# combines both name list and uid list to be used in the html
 	uid_name = []
 	for i in range(len(uid_list)):
 		cat = (uid_list[i],name_list[i])
 		uid_name.append(cat)
 
-	return(render_template('profiles.html',friend_info=friend_info,uid_name=uid_name))
+	plot_name = create_undirected_graph(name)
+
+	return(render_template('profiles.html',friend_info=friend_info,\
+		uid_name=uid_name,plotPng=plot_name))
 
 @app.route('/upload',methods=['GET','POST'])
 def make_upload():
 	if request.method == 'GET':
-		return render_template('upload.html')
+		return render_template('upload.html') 
 	elif request.method == 'POST':
-		upload_edges = request.files['file']
-		upload_attributes = request.files['file']
-		if upload_edges and allowed_file(upload_edges.filename):
-			upload_edges.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-		if upload_attributes and allowed_file(upload_attributes.filename):
-			upload_attributes.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
 
-		# f=open('upload_edges','w')
-		# json.dump(upload_edges,f)
-		# f.close()
+		upload_edges = request.files['friend_edges']
+		upload_edges.save('/uploads/user_test.json')
 
-		# create_edge_table('upload_edges.json')
+		upload_attributes = request.files['friend_attributes']
+		upload_attributes.save('/uploads/user_test.json')
+		return (redirect('/upload')) 
 
 if __name__ == '__main__':
-    app.debug=True
+    # app.debug=True
     app.run()

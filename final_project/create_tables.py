@@ -6,7 +6,7 @@ import pandas as pd
 import networkx as nx
 import json
 import matplotlib.pyplot as plt 
-import warnings
+import tempfile
 
 dbname="facebook"
 host="127.0.0.2"
@@ -18,22 +18,28 @@ c = db.cursor()
 
 def get_edge_data(edges):
 	uid = []
+	# opens json file, loads it, and closes the file
 	json_data = open(edges)
 	friend_edge_data = json.load(json_data)
 	json_data.close()
 
+	# creates a list of tuples of names
 	for i in friend_edge_data:
 		uid.append((i['uid1'],i['uid2']))
 	return uid
 
+# takes file friend_attributes.json and returns a list of lists of info
 def get_friend_info(attributes):
 	friend_info = []
+
+	# opens json file, loads it, and closes the file
 	friend_data = open(attributes)
 	friend_info_data = json.load(friend_data)
 	friend_data.close()
 
 	info_list = []
 
+	# loops through loaded json data and creates a list of lists of information
 	for i in friend_info_data:
 		temp_info = []
 
@@ -49,7 +55,7 @@ def get_friend_info(attributes):
 		sex = i['sex']
 		temp_info.append(sex)
 
-		# getting affiliations
+		# getting affiliations if empty list fills in with none
 		affiliations = i['affiliations']
 		if affiliations == None or not affiliations:
 			temp = None
@@ -64,7 +70,7 @@ def get_friend_info(attributes):
 		birthday = i['birthday']
 		temp_info.append(birthday)
 
-		# getting home town
+		# getting home town if empty fills in with none
 		home = i['hometown_location']
 		if home != None:
 			home_string = home['name']+', '+home['country']
@@ -72,7 +78,7 @@ def get_friend_info(attributes):
 			home_string = None
 		temp_info.append(home_string)
 
-		# getting current location
+		# getting current location, if empty fills in with none
 		cur_loc = i['current_location']
 		if cur_loc != None:
 			current_location_string = cur_loc['name']+', '+cur_loc['country']
@@ -80,7 +86,7 @@ def get_friend_info(attributes):
 			current_location_string = None
 		temp_info.append(current_location_string)
 
-		# getting relationship_status
+		# getting relationship_status, if empty fills in with none
 		relationship_status = i['relationship_status']
 		if relationship_status == "":
 			relationship_status = None
@@ -113,19 +119,23 @@ def get_friend_info(attributes):
 		info_list.append(temp_info)
 	return info_list
 
+# takes a json file and creates a SQL table and inserts data
 def create_edge_table(edges):
+	# creates SQL table
 	sql_friend_edges = '''CREATE TABLE IF NOT EXISTS 
 		friend_edges(uid1 nvarchar (128), uid2 nvarchar (128));'''
-
 	c.execute(sql_friend_edges)
 	
+	# Gets data in the form of a list of tuples
 	uid = get_edge_data(edges)
+
+	# Inserts data into SQL table
 	insertQuery = '''INSERT INTO friend_edges(uid1, uid2) VALUES (%s, %s);'''
 	c.executemany(insertQuery,uid)
 
-
-
+# takes a json file and cretes a SQL table and inserts data
 def create_attributes_table(attributes):
+	# creates SQL table
 	sql_friend_info = '''CREATE TABLE IF NOT EXISTS friend_info
 		(uid nvarchar (128), name nvarchar (128), sex varchar (64), affiliations nvarchar (128),
 		birthday nvarchar (128), hometown_location nvarchar (128),
@@ -135,75 +145,90 @@ def create_attributes_table(attributes):
 			
 	c.execute(sql_friend_info)
 
+	# gets info from json file
 	friend_attributes = get_friend_info(attributes)
+
+	# inserts data into SQL table
 	insertQuery = '''INSERT INTO friend_info(uid, name, sex, affiliations,
 		birthday, hometown_location, current_location, relationship_status,
 		significant_other_id, political, religion, locale, profile_url, pic)
 		VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'''
 	c.executemany(insertQuery, friend_attributes)
 
+# creates and fills tables as long as these files exist
 create_attributes_table("friend_attributes.json")
 create_edge_table("friend_edges.json")
 
 db.commit()
 
-# Undirected Graphs
+# Undirected Graphs: 
+# takes a name, returns a list of friends
+def create_friends_list(name):
+	# turns json file into a pandas data frame
+	edgeList = pd.read_json("friend_edges.json")
+
+	# finds edges containing the given name
+	uid1 = edgeList.query('uid1==["%s"]' % name)
+	uid2 = edgeList.query('uid2==["%s"]' % name)
+	
+	# creates a friends list
+	friends_list = []
+	for name in uid1['uid2'].iteritems():
+		friends_list.append(name[1])
+	for name in uid2['uid1'].iteritems():
+		friends_list.append(name[1])
+	
+	return friends_list
+
+# takes a name and creates a graph and returns a graph name
 def create_undirected_graph(name):
 	edgeList = pd.read_json("friend_edges.json")
+
+	# finds all edges containing the given name
+	uid1 = edgeList.query('uid1==["%s"]' % name)
+	uid2 = edgeList.query('uid2==["%s"]' % name)
+	# creates a network graph
 	g = nx.Graph()
 
-	uid1 = edgeList.query('uid1==["%s"]'%name)
-	uid2 = edgeList.query('uid2==["%s"]'%name)
+	# concatenates the edges into a singl list
 	uid = pd.concat([uid1,uid2])
-
 	for uid1, uid2 in uid.to_records(index=False):
 		g.add_edge(uid1,uid2)
-
-	springLayout = nx.layout.spring_layout(g)
-	nx.draw(g,pos=circularLayout, with_labels="uid1")
-	plt.show()
-
-# Tests
-
-# c.execute('''SELECT name, sex, affiliations, birthday,
-# 	hometown_location, current_location, relationship_status, 
-# 	significant_other_id, political, religion, profile_url, pic 
-# 	FROM friend_info 
-# 	WHERE uid=%s;''',1419464989)
-# friend_info = c.fetchall()
-
-# name = friend_info[0][0]
-# name_list = []
-# print name
-
-# c.execute('''SELECT * FROM friend_edges
-# 		WHERE uid1=%s;''',name)
-# friend_edge_uid1=c.fetchall()
-
-# for friend in friend_edge_uid1: 
-# 	name_list.append(friend[1])
-
-# c.execute('''SELECT * FROM friend_edges
-# 		WHERE uid2=%s;''',name)
-# friend_edge_uid2=c.fetchall()
 	
-# for friend in friend_edge_uid2:
-# 	name_list.append(friend[0])
+	# creates a list of friends for the given name
+	friends_list = create_friends_list(name)
 
-# print name_list
-# name_list.sort()
-# name_list.remove("Kevin On")
+	dict_list = []
+	# for each friend in the friends list, it finds mutual friends
+	for friend in friends_list:
+		# creates a friend list for a person on the original friend list
+		temp = create_friends_list(friend)
+		# compares friend lists
+		temp_friends = list(set(temp) & set(friends_list))
+		# creates a dictionary of mutual friends
+		for each in temp_friends:
+			edge = {"uid1":friend,"uid2":each}
+			dict_list.append(edge)
+	# turns the mutual friends into a data frame
+	new_edges = pd.DataFrame(dict_list)
+
+	# adds edges for new mutual friends
+	for uid1, uid2 in new_edges.to_records(index=False):
+		g.add_edge(uid1,uid2)
+
+	# specifies a layout
+	Layout = nx.layout.random_layout(g)
+	# draws the figure
+	nx.draw(g,pos=Layout, with_labels="uid1",\
+	node_size=25,font_size=5,width=0.1,node_color='b')
+	f = tempfile.NamedTemporaryFile(
+		dir='static/temp',
+		suffix='.png',delete=False)
+	# saves the figure
+	plt.savefig(f,dpi=150)
+	f.close
+	# random name for the figure
+	plotPng = f.name.split('/')[-1]
 	
-# uid_list = []
-# for friend in name_list:
-# 	c.execute('''SELECT uid FROM friend_info WHERE name=%s;''',friend)
-# 	uid_info = c.fetchall()
-# 	if not uid_info:
-# 		continue
-# 	else:
-# 		uid_list.append(uid_info[0][0])
-	
-# uid_name = []
-# for i in range(len(uid_list)):
-# 	cat = (uid_list[i],name_list[i])
-# 	uid_name.append(cat)
+	return plotPng
+
