@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
 from io import open
-from create_tables import create_undirected_graph
+from create_tables import *
+from uploads_create_tables import *
+from create_graph import create_undirected_graph
+import create_tables
 import pymysql
 import pandas as pd
 import networkx as nx
@@ -18,22 +21,17 @@ c = db.cursor()
 
 # Flask Portion
 
-UPLOAD_FOLDER = '/home/Kevin/cfss/cfss-homework-KTCO/final_project/uploads'
-ALLOWED_EXTENSIONS = set(['json'])
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def make_index_resp():
+	db=pymysql.connect(db=dbname, host=host, user=user,passwd=passwd, charset='utf8')
+	c = db.cursor()
 	# creates a list of friends on the webpage
 	c.execute('''SELECT uid, name FROM friend_info ORDER BY name;''')
 	friend_info = c.fetchall()
 	return(render_template('index.html',friend_info=friend_info))
-
+ 
 @app.route('/profile/<uid>/')
 # takes an uid and finds information about them from the SQL server
 def make_profiles(uid):
@@ -90,19 +88,19 @@ def make_profiles(uid):
 	return(render_template('profiles.html',friend_info=friend_info,\
 		uid_name=uid_name,plotPng=plot_name))
 
-@app.route('/upload',methods=['GET','POST'])
+@app.route('/upload/',methods=['GET','POST'])
 def make_upload():
 	if request.method == 'GET':
 		return render_template('upload.html') 
 	elif request.method == 'POST':
+		friend_edges = request.files['edges']
+		upload_attributes = request.files['attributes']
 
-		upload_edges = request.files['friend_edges']
-		upload_edges.save('/uploads/user_test.json')
+		upload_create_edge_table(friend_edges)
+		upload_create_attributes_table(upload_attributes) 
 
-		upload_attributes = request.files['friend_attributes']
-		upload_attributes.save('/uploads/user_test.json')
-		return (redirect('/upload')) 
+	 	return (redirect("/")) 
 
 if __name__ == '__main__':
-    # app.debug=True
-    app.run()
+    app.debug=True 
+    app.run() 
