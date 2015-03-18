@@ -35,6 +35,8 @@ def make_index_resp():
 @app.route('/profile/<uid>/')
 # takes an uid and finds information about them from the SQL server
 def make_profiles(uid):
+	db=pymysql.connect(db=dbname, host=host, user=user,passwd=passwd, charset='utf8')
+	c = db.cursor()
 	# gets information about each person from SQL server
 	c.execute('''SELECT name, sex, affiliations, birthday,
 	hometown_location, current_location, relationship_status, 
@@ -65,7 +67,10 @@ def make_profiles(uid):
 	# sorts the names alphabetically
 	name_list.sort()
 	# my name does not have a uid associated with which throws some errors
-	name_list.remove("Kevin On")
+	try:
+		name_list.remove("Kevin On")
+	except ValueError:
+		pass
 	
 	uid_list = []
 	# finds all uids associated with each name
