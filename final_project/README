@@ -1,4 +1,6 @@
-To upload a json file to the SQL database, have two files named "friend_attributes.json" and "friend_edges.json" in the current directory
+To upload a json file to the SQL database, have two files named "friend_attributes.json" and "friend_edges.json" in the current directory and a database called "facebook" in SQL
 
-Run the python script "social_network.py" to access the list of friends online. It will automatically look for 2 files in the directory named "friend_attributes.json" and "friend_edges.json" and upload them
+Run the python script "social_network.py." It will automatically look for 2 files in the directory named "friend_attributes.json" and "friend_edges.json" and upload them to a SQL database called "facebook"
+
+Then call the website to view the project
 

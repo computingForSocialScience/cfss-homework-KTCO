@@ -19,7 +19,7 @@ c = db.cursor()
 
 def upload_get_edge_data(edges):
 	uid = []
-	# opens json file, loads it, and closes the file
+	# loads a file in json format
 	friend_edge_data = json.load(edges)
 
 	# creates a list of tuples of names
@@ -30,7 +30,7 @@ def upload_get_edge_data(edges):
 def upload_get_friend_info(attributes):
 	friend_info = []
 
-	# opens json file, loads it, and closes the file
+	# loads a file in json format
 	friend_info_data = json.load(attributes)
 	info_list = []
 
@@ -115,6 +115,7 @@ def upload_get_friend_info(attributes):
 	return info_list
 
 def upload_create_edge_table(edges):
+	# deletes current sql table
 	sql_delete = ''' DELETE FROM friend_edges;'''
 	c.execute(sql_delete)
 	# Gets data in the form of a list of tuples
@@ -126,6 +127,7 @@ def upload_create_edge_table(edges):
 	db.commit()
 
 def upload_create_attributes_table(attributes):
+	# deletes data in sql table
 	sql_delete = ''' DELETE FROM friend_info;'''
 	c.execute(sql_delete)
 	

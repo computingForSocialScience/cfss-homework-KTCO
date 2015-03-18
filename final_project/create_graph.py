@@ -38,8 +38,9 @@ def create_undirected_graph(name):
 	uid1 = edgeList.query('uid1==["%s"]' % name)
 	uid2 = edgeList.query('uid2==["%s"]' % name)
 	
-	# concatenates the edges into a singl list
+	# concatenates the edges into a single list
 	uid = pd.concat([uid1,uid2])
+	# adds edges to graph
 	for uid1, uid2 in uid.to_records(index=False):
 		g.add_edge(uid1,uid2)
 	
@@ -75,6 +76,7 @@ def create_undirected_graph(name):
 		suffix='.png',delete=False)
 	# saves the figure
 	plt.savefig(f,dpi=150)
+	# clears figure
 	plt.clf()
 	f.close
 
